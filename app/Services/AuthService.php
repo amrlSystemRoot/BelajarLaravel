@@ -84,7 +84,7 @@ class AuthService implements AuthInterface {
 
             return [
                 'status'        => 'success',
-                'message'       => 'sign in success',
+                'message'       => 'sign out success',
                 'data'          => [],
                 'code'          => 200,
             ];
