@@ -11,6 +11,7 @@ class AuthenticationTest extends TestCase
 {
     protected $user_test;
     protected $route_prefix;
+    protected $accessToken;
 
     protected function setUp(): void
     {
@@ -19,6 +20,15 @@ class AuthenticationTest extends TestCase
         DB::beginTransaction();
         $this->user_test    = User::factory()->create();
         $this->route_prefix = env('APP_URL') . '/api/auth';
+    }
+
+    public function signin() : void {
+        $user = $this->user_test->toArray();
+        $user['password'] = 'password';
+
+        $response = $this->post($this->route_prefix . '/signin', $user);
+
+        $this->accessToken = $response['data']['accessToken'];
     }
 
     public function test_user_can_sign_up()
@@ -41,17 +51,39 @@ class AuthenticationTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeText($user['email']);
+
+        $this->accessToken = $response['data']['accessToken'];
     }
 
     public function test_user_can_sign_out()
     {
-        $user = $this->user_test->toArray();
-        $user['password'] = 'password';
+        $this->signin();
 
-        $signIn   = $this->post($this->route_prefix . '/signin', $user);
-        $response = $this->post($this->route_prefix . '/signout', [], ['Authorization' => 'Bearer ' . $signIn['data']['accessToken']]);
+        $response = $this->post($this->route_prefix . '/signout', [], ['Authorization' => 'Bearer ' . $this->accessToken]);
 
         $response->assertOk();
         $response->assertSeeText('success');
+    }
+
+    public function test_user_can_update_profile()
+    {
+        $this->signin();
+
+        $response = $this->put($this->route_prefix . '/user', ['name' => "testing" ], ['Authorization' => 'Bearer ' . $this->accessToken]);
+
+        $response->assertOk();
+        $response->assertSeeText('success');
+        $response->assertSeeText('testing');
+    }
+
+    public function test_user_can_see_profile()
+    {
+        $this->signin();
+
+        $response = $this->get($this->route_prefix . '/user', ['Authorization' => 'Bearer ' . $this->accessToken]);
+
+        $response->assertOk();
+        $response->assertSeeText('success');
+        $response->assertSeeText($this->user_test['email']);
     }
 }

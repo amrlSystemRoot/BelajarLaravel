@@ -16,6 +16,27 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthService implements AuthInterface {
 
+    public function index(Request $request) : Array {
+        try {
+
+            return [
+                'status'   => 'success',
+                'message'  => 'sign up success',
+                'data'     => new UserResource($request->user()),
+                'code'     => 200,
+            ];
+
+        } catch (\Throwable $th) {
+
+            return [
+                'status'   => 'error',
+                'message'  => $th->getMessage(),
+                'data'     => [],
+                'code'     => 500,
+            ];
+        }
+    }
+
     public function signUp(SignUpRequest $request) : Array {
         try {
             DB::beginTransaction();
@@ -30,7 +51,7 @@ class AuthService implements AuthInterface {
 
             return [
                 'status'   => 'success',
-                'message' => 'sign up success',
+                'message'  => 'sign up success',
                 'data'     => new UserResource($user),
                 'code'     => 200,
             ];

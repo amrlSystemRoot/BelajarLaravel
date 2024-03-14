@@ -27,6 +27,11 @@ class AuthController extends Controller
         );
     }
 
+    public function index(Request $request)
+    {
+        return $this->response($this->authService->index($request));
+    }
+
     public function signUp(SignUpRequest $request)
     {
         return $this->response($this->authService->signUp($request));
