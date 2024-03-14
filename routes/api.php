@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\SekolahController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,23 +14,17 @@ use App\Http\Controllers\SekolahController;
 |
 */
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(
-    function ()
-    {
-        // Route class sekolah
-        Route::get('/sekolah', [SekolahController::class, 'index']);
-        Route::post('/sekolah', [SekolahController::class, 'store']);
-        Route::put('/sekolah/{id}', [SekolahController::class, 'update']);
-        Route::delete('/sekolah/{id}', [SekolahController::class, 'destroy']);
+Route::controller(AuthController::class)->prefix('auth')->group(function () : void {
+    Route::post('/signup', 'signUp');
+    Route::post('/signin', 'signIn');
+});
 
-        // update user
-        Route::get('/user', [AuthController::class, 'index']);
-        Route::put('/user', [AuthController::class, 'update']);
 
-        // logout
-        Route::post('/logout', [AuthController::class, 'destroy']);
-    }
-);
+Route::middleware('auth:sanctum')->group(function () : void {
+    Route::controller(AuthController::class)->prefix('auth')->group(function () : void {
+        Route::get('/user', 'index');
+        Route::put('/user', 'update');
+        Route::post('/signout', 'signOut');
+    });
+});
